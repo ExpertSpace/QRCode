@@ -5,8 +5,10 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
+import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -24,11 +26,19 @@ import github.nisrulz.qreader.QREader;
 
 public class MainActivity extends AppCompatActivity {
 
-    public TextView tvRes;
+    private ImageView ivBackgroundMessage;
+    private TextView tvRes;
     private TextView tvRes0;
     private SurfaceView surfaceView;
     private QREader qrEader;
     private ToggleButton button;
+
+    private String []data;
+
+    private String host = "";
+    private String port = "";
+
+    int count = 0;
 
     //public String androidIDFirst = android.provider.Settings.System.getString(this.getContentResolver(), Secure.ANDROID_ID);
     public static String androidID = "androidIDFirst";
@@ -44,8 +54,6 @@ public class MainActivity extends AppCompatActivity {
 
         initView();
         requestCameraPermission();
-//        new Server().execute();
-        //runServer();
     }
 
     private void runServer()
@@ -88,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initView() {
+        ivBackgroundMessage = findViewById(R.id.ivBackgroundMessage);
         tvRes = findViewById(R.id.textView);
         button = findViewById(R.id.button2);
     }
@@ -95,17 +104,32 @@ public class MainActivity extends AppCompatActivity {
     private void initQREader() {
         qrEader = new QREader.Builder(this, surfaceView, new QRDataListener() {
             @Override
-            public void onDetected(String data) {
+            public void onDetected(String getData) {
                 tvRes.post(new Runnable() {
                     @Override
                     public void run() {
-                        tvRes.setText(data);
-                        if(!data.isEmpty())
+                        data = getData.split("\n");
+
+                        host = data[0];
+                        port = data[1];
+
+                        tvRes0.setText(host + "\n");
+                        tvRes0.append(port);
+
+                        if(host.equals("192.168.0.106") && Integer.parseInt(port) == 8080)
                         {
-                            new Server().execute();
                             runServer();
+                            tvRes.setText("OK!");
+                            ivBackgroundMessage.setBackgroundResource(R.drawable.green_ok);
                         }
+                        else
+                        {
+                            tvRes.setText("Указан неверный хост или порт");
+                            ivBackgroundMessage.setBackgroundResource(R.drawable.red_error);
+                        }
+                        count++;
                     }
+
                 });
             }
         }).facing(QREader.BACK_CAM)

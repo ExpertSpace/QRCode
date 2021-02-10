@@ -1,6 +1,7 @@
 package com.example.qrcode;
 
 import android.os.AsyncTask;
+import android.provider.Settings;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -13,6 +14,8 @@ public class Server extends AsyncTask <Void, Void, Void> {
 
     Socket clientSocket;
     OutputStreamWriter outputStreamWriter;
+
+    //public String androidIDFirst = android.provider.Settings.System.getString(MainActivity.getContentResolver(), Settings.Secure.ANDROID_ID);
 
     @Override
     protected void onPreExecute() {
