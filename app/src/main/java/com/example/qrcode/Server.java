@@ -1,19 +1,15 @@
 package com.example.qrcode;
 
 import android.os.AsyncTask;
-import android.provider.Settings;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 
-import static com.example.qrcode.MainActivity.tvRes;
+import static com.example.qrcode.MainActivity.androidID;
 
 
 public class Server extends AsyncTask <Void, Void, Void> {
-
-    //private String androidID = android.provider.Settings.System.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-    public static String androidID = "888";
 
     Socket clientSocket;
     OutputStreamWriter outputStreamWriter;
@@ -26,11 +22,15 @@ public class Server extends AsyncTask <Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... voids) {
         try {
-            clientSocket = new Socket("84.252.131.113", 6868);
+            clientSocket = new Socket("192.168.0.106", 8080);
 
             outputStreamWriter = new OutputStreamWriter(clientSocket.getOutputStream());
 
             outputStreamWriter.write(androidID);
+
+            outputStreamWriter.flush();
+            outputStreamWriter.close();
+            clientSocket.close();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -42,18 +42,5 @@ public class Server extends AsyncTask <Void, Void, Void> {
     @Override
     protected void onPostExecute(Void result) {
 
-        if(!clientSocket.isConnected())
-            tvRes.setText("Не удалось подключиться!");
-
-        try {
-            outputStreamWriter = new OutputStreamWriter(clientSocket.getOutputStream());
-
-            outputStreamWriter.write(androidID);
-
-            outputStreamWriter.close();
-            clientSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

@@ -1,18 +1,16 @@
 package com.example.qrcode;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.telephony.TelephonyManager;
+import android.provider.Settings.Secure;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
@@ -21,25 +19,19 @@ import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.net.ServerSocket;
-import java.net.Socket;
-
 import github.nisrulz.qreader.QRDataListener;
 import github.nisrulz.qreader.QREader;
 
-import static com.example.qrcode.Server.androidID;
-
 public class MainActivity extends AppCompatActivity {
 
-    public static TextView tvRes;
+    public TextView tvRes;
     private TextView tvRes0;
     private SurfaceView surfaceView;
     private QREader qrEader;
     private ToggleButton button;
 
-    //private String androidID = android.provider.Settings.System.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
+    //public String androidIDFirst = android.provider.Settings.System.getString(this.getContentResolver(), Secure.ANDROID_ID);
+    public static String androidID = "androidIDFirst";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,18 +44,26 @@ public class MainActivity extends AppCompatActivity {
 
         initView();
         requestCameraPermission();
+//        new Server().execute();
+        //runServer();
     }
 
-//    private void sendDataToServer() throws IOException {
-//        Socket clientSocket = new Socket("127.0.0.1", 8000);
-//
-//        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(clientSocket.getOutputStream());
-//
-//        outputStreamWriter.write(androidID);
-//
-//        outputStreamWriter.close();
-//        clientSocket.close();
-//    }
+    private void runServer()
+    {
+        Thread t = new Thread(){
+            @Override
+            public void run()
+            {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        new Server().execute();
+                    }
+                });
+            }
+        };
+        t.start();
+    }
 
     private void requestCameraPermission() {
         Dexter.withActivity(this)
@@ -100,6 +100,11 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         tvRes.setText(data);
+                        if(!data.isEmpty())
+                        {
+                            new Server().execute();
+                            runServer();
+                        }
                     }
                 });
             }
